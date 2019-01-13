@@ -13,7 +13,7 @@ while : ; do
 	fi
 done
 
-echo "[info] WebUI port defined as ${WEBUI_PORT}" | ts '%Y-%m-%d %H:%M:%.S'
+echo "[info] WebUI port defined as ${WEBUI_PORT_ENV}" | ts '%Y-%m-%d %H:%M:%.S'
 
 # strip whitespace from start and end of LAN_NETWORK
 export LAN_NETWORK=$(echo "${LAN_NETWORK}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
@@ -47,10 +47,10 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 	echo "[info] iptable_mangle support detected, adding fwmark for tables" | ts '%Y-%m-%d %H:%M:%.S'
 
 	# setup route for qbittorrent webui using set-mark to route traffic for port 8080 to eth0
-	if [ -z "${WEBUI_PORT}" ]; then
+	if [ -z "${WEBUI_PORT_ENV}" ]; then
 		echo "8080    webui" >> /etc/iproute2/rt_tables
 	else
-		echo "${WEBUI_PORT}     webui" >> /etc/iproute2/rt_tables
+		echo "${WEBUI_PORT_ENV}     webui" >> /etc/iproute2/rt_tables
 	fi
 	
 	ip rule add fwmark 1 table webui
@@ -99,12 +99,12 @@ iptables -A INPUT -s "${docker_network_cidr}" -d "${docker_network_cidr}" -j ACC
 iptables -A INPUT -i eth0 -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
 
 # accept input to qbittorrent webui port
-if [ -z "${WEBUI_PORT}" ]; then
+if [ -z "${WEBUI_PORT_ENV}" ]; then
 	iptables -A INPUT -i eth0 -p tcp --dport 8080 -j ACCEPT
 	iptables -A INPUT -i eth0 -p tcp --sport 8080 -j ACCEPT
 else
-	iptables -A INPUT -i eth0 -p tcp --dport ${WEBUI_PORT} -j ACCEPT
-	iptables -A INPUT -i eth0 -p tcp --sport ${WEBUI_PORT} -j ACCEPT
+	iptables -A INPUT -i eth0 -p tcp --dport ${WEBUI_PORT_ENV} -j ACCEPT
+	iptables -A INPUT -i eth0 -p tcp --sport ${WEBUI_PORT_ENV} -j ACCEPT
 fi
 
 # accept input to qbittorrent daemon port - used for lan access
@@ -144,23 +144,23 @@ iptables -A OUTPUT -o eth0 -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
 if [[ $iptable_mangle_exit_code == 0 ]]; then
 
 	# accept output from qBittorrent webui port - used for external access
-	if [ -z "${WEBUI_PORT}" ]; then
+	if [ -z "${WEBUI_PORT_ENV}" ]; then
 		iptables -t mangle -A OUTPUT -p tcp --dport 8080 -j MARK --set-mark 1
 		iptables -t mangle -A OUTPUT -p tcp --sport 8080 -j MARK --set-mark 1
 	else
-		iptables -t mangle -A OUTPUT -p tcp --dport ${WEBUI_PORT} -j MARK --set-mark 1
-		iptables -t mangle -A OUTPUT -p tcp --sport ${WEBUI_PORT} -j MARK --set-mark 1
+		iptables -t mangle -A OUTPUT -p tcp --dport ${WEBUI_PORT_ENV} -j MARK --set-mark 1
+		iptables -t mangle -A OUTPUT -p tcp --sport ${WEBUI_PORT_ENV} -j MARK --set-mark 1
 	fi
 	
 fi
 
 # accept output from qBittorrent webui port - used for lan access
-if [ -z "${WEBUI_PORT}" ]; then
+if [ -z "${WEBUI_PORT_ENV}" ]; then
 	iptables -A OUTPUT -o eth0 -p tcp --dport 8080 -j ACCEPT
 	iptables -A OUTPUT -o eth0 -p tcp --sport 8080 -j ACCEPT
 else
-	iptables -A OUTPUT -o eth0 -p tcp --dport ${WEBUI_PORT} -j ACCEPT
-	iptables -A OUTPUT -o eth0 -p tcp --sport ${WEBUI_PORT} -j ACCEPT
+	iptables -A OUTPUT -o eth0 -p tcp --dport ${WEBUI_PORT_ENV} -j ACCEPT
+	iptables -A OUTPUT -o eth0 -p tcp --sport ${WEBUI_PORT_ENV} -j ACCEPT
 fi
 
 # accept output to qBittorrent daemon port - used for lan access
