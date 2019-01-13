@@ -1,30 +1,34 @@
-# Transmission and OpenVPN
+# qBittorrent and OpenVPN
 #
-# Version 1.5
+# Version 1.8
 
-FROM ubuntu:14.04
-MAINTAINER Kristian Haugene
+FROM ubuntu:18.04
+MAINTAINER MarkusMcNugen
 
-VOLUME /data
+VOLUME /downloads
 VOLUME /config
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN usermod -u 99 nobody
 
 # Update packages and install software
 RUN apt-get update \
-    && apt-get -y install software-properties-common \
+    && apt-get install -y --no-install-recommends apt-utils openssl \
+    && apt-get install -y software-properties-common \
     && add-apt-repository ppa:qbittorrent-team/qbittorrent-stable \
     && apt-get update \
-    && apt-get install -y qbittorrent openvpn curl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    && curl -L https://github.com/jwilder/dockerize/releases/download/v0.0.2/dockerize-linux-amd64-v0.0.2.tar.gz | tar -C /usr/local/bin -xzv
+    && apt-get install -y qbittorrent-nox openvpn curl moreutils net-tools dos2unix kmod iptables ipcalc unrar \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add configuration and scripts
 ADD openvpn/ /etc/openvpn/
-ADD qBittorrent/ /etc/qBittorrent/
+ADD qbittorrent/ /etc/qbittorrent/
 
-ENV OPENVPN_USERNAME=**None** \
-    OPENVPN_PASSWORD=**None** \
-    OPENVPN_PROVIDER=**None** 
+RUN chmod +x /etc/qbittorrent/*.sh /etc/qbittorrent/*.init /etc/openvpn/*.sh
 
-# Expose port and run
-EXPOSE 9091
-CMD ["/etc/openvpn/start.sh"]
+# Expose ports and run
+EXPOSE 8080
+EXPOSE 8999
+EXPOSE 8999/udp
+CMD ["/bin/bash", "/etc/openvpn/start.sh"]
