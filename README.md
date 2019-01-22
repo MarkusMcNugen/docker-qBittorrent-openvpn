@@ -44,8 +44,8 @@ $ docker run --privileged  -d \
 |`PUID`| No | UID applied to config files and downloads |`PUID=99`|
 |`PGID`| No | GID applied to config files and downloads |`PGID=100`|
 |`UMASK`| No | GID applied to config files and downloads |`UMASK=002`|
-|`WEBUI_PORT_ENV`| No | Applies WebUI port to qBittorrents config at boot (Must change exposed ports to match)  |`WEBUI_PORT_ENV=8080`|
-|`INCOMING_PORT_ENV`| No | Applies Incoming port to qBittorrents config at boot (Must change exposed ports to match) |`INCOMING_PORT_ENV=8999`|
+|`WEBUI_PORT`| No | Applies WebUI port to qBittorrents config at boot (Must change exposed ports to match)  |`WEBUI_PORT=8080`|
+|`INCOMING_PORT`| No | Applies Incoming port to qBittorrents config at boot (Must change exposed ports to match) |`INCOMING_PORT=8999`|
 
 ## Volumes
 | Volume | Required | Function | Example |
@@ -73,7 +73,7 @@ Access http://IPADDRESS:PORT from a browser on the same network.
 WebUI\CSRFProtection must be set to false in qBittorrent.conf if using an unconfigured reverse proxy or forward request within a browser. This is the default setting unless changed. This file can be found in the dockers config directory in /qBittorrent/config
 
 ## WebUI: Invalid Host header, port mismatch
-qBittorrent throws a [WebUI: Invalid Host header, port mismatch](https://github.com/qbittorrent/qBittorrent/issues/7641#issuecomment-339370794) error if you use port forwarding with bridge networking due to security features to prevent DNS rebinding attacks. If you need to run qBittorrent on different ports, instead edit the WEBUI_PORT_ENV and/or INCOMING_PORT_ENV variables AND the exposed ports to change the native ports qBittorrent uses.
+qBittorrent throws a [WebUI: Invalid Host header, port mismatch](https://github.com/qbittorrent/qBittorrent/issues/7641#issuecomment-339370794) error if you use port forwarding with bridge networking due to security features to prevent DNS rebinding attacks. If you need to run qBittorrent on different ports, instead edit the WEBUI_PORT and/or INCOMING_PORT variables AND the exposed ports to change the native ports qBittorrent uses.
 
 # How to use OpenVPN
 The container will fail to boot if `VPN_ENABLED` is set to yes or empty and a .ovpn is not present in the /config/openvpn directory. Drop a .ovpn file from your VPN provider into /config/openvpn and start the container again. You may need to edit the ovpn configuration file to load your VPN credentials from a file by setting `auth-user-pass`.
