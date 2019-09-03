@@ -165,7 +165,25 @@ if [[ $VPN_ENABLED == "yes" ]]; then
 	exec openvpn --config ${VPN_CONFIG} &
 	# give openvpn some time to connect
 	sleep 5
-	#exec /bin/bash /etc/openvpn/openvpn.init start &
+
+	# PIA port Forward
+	if [[ $PIA_PORT_FORWARD == "yes" ]]; then
+
+		echo "Trying to get a port forward from PIA" | ts '%Y-%m-%d %H:%M:%.S'
+
+		client_id=`head -n 100 /dev/urandom | sha256sum | tr -d " -"`
+
+		json=`curl "http://209.222.18.222:2000/?client_id=$client_id" 2>/dev/null`
+		if [ "$json" == "" ]; then
+			echo 'Port forwarding is already activated on this connection, has expired, or you are not connected to a PIA region that supports port forwarding' | ts '%Y-%m-%d %H:%M:%.S'
+		else
+			port=$(echo ${json} | tr -dc '0-9')
+			echo "Setting INCOMMING_PORT to pia port : ${port}" | ts '%Y-%m-%d %H:%M:%.S'
+			export INCOMING_PORT=${port}
+		fi
+
+	fi
+
 	exec /bin/bash /etc/qbittorrent/iptables.sh
 else
 	exec /bin/bash /etc/qbittorrent/start.sh
