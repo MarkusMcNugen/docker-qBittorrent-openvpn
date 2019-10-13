@@ -165,7 +165,8 @@ if [[ $VPN_ENABLED == "yes" ]]; then
 	exec openvpn --config ${VPN_CONFIG} &
 	# give openvpn some time to connect
 	sleep 5
-
+ 	#exec /bin/bash /etc/openvpn/openvpn.init start &
+	 
 	# PIA port Forward
 	# https://www.privateinternetaccess.com/helpdesk/kb/articles/can-i-use-port-forwarding-without-using-the-pia-client
 	if [[ $PIA_PORT_FORWARD == "true" ]]; then
