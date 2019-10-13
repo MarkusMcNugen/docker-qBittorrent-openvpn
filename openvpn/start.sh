@@ -167,7 +167,8 @@ if [[ $VPN_ENABLED == "yes" ]]; then
 	sleep 5
 
 	# PIA port Forward
-	if [[ $PIA_PORT_FORWARD == "yes" ]]; then
+	# https://www.privateinternetaccess.com/helpdesk/kb/articles/can-i-use-port-forwarding-without-using-the-pia-client
+	if [[ $PIA_PORT_FORWARD == "true" ]]; then
 
 		echo "Trying to get a port forward from PIA" | ts '%Y-%m-%d %H:%M:%.S'
 
