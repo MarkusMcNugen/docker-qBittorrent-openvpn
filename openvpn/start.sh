@@ -2,6 +2,9 @@
 # Forked from binhex's OpenVPN dockers
 set -e
 
+ETC_OPENVPN=/etc/openvpn
+OPENVPN_CONFIG="$ETC_OPENVPN/client.ovpn"
+
 # check for presence of network interface docker0
 check_network=$(ifconfig | grep docker0 || true)
 
@@ -19,51 +22,48 @@ else
 fi
 
 if [[ $VPN_ENABLED == "yes" ]]; then
-	# create directory to store openvpn config files
-	mkdir -p /config/openvpn
-	# set perms and owner for files in /config/openvpn directory
+	# Set default path to OpenVPN config file if not defined.
+	if [ -z "$VPN_CONFIG" ]; then
+		export VPN_CONFIG=/config/client.ovpn
+	fi
+
+	# exit if ovpn file not found
+	if [ ! -f "${VPN_CONFIG}" ]; then
+		echo "[crit] No OpenVPN config file located at $VPN_CONFIG. Please download from your VPN provider and then restart this container, exiting..." | ts '%Y-%m-%d %H:%M:%.S' && exit 1
+	fi
+
+	echo "[info] OpenVPN config file is located at ${VPN_CONFIG}" | ts '%Y-%m-%d %H:%M:%.S'
+
+	# set perms and owner for files in $VPN_CONFIG directory
 	set +e
-	chown -R "${PUID}":"${PGID}" "/config/openvpn" &> /dev/null
+	chown -R "${PUID}":"${PGID}" "$VPN_CONFIG" &> /dev/null
 	exit_code_chown=$?
-	chmod -R 775 "/config/openvpn" &> /dev/null
+	chmod -R 644 "$VPN_CONFIG" &> /dev/null
 	exit_code_chmod=$?
 	set -e
 	if (( ${exit_code_chown} != 0 || ${exit_code_chmod} != 0 )); then
-		echo "[warn] Unable to chown/chmod /config/openvpn/, assuming SMB mountpoint" | ts '%Y-%m-%d %H:%M:%.S'
+		echo "[warn] Unable to chown/chmod $VPN_CONFIG, assuming SMB mountpoint" | ts '%Y-%m-%d %H:%M:%.S'
 	fi
-	
-	# wildcard search for openvpn config files (match on first result)
-	export VPN_CONFIG=$(find /config/openvpn -maxdepth 1 -name "*.ovpn" -print -quit)
-	
-	# if ovpn file not found in /config/openvpn then exit
-	if [[ -z "${VPN_CONFIG}" ]]; then
-		echo "[crit] No OpenVPN config file located in /config/openvpn/ (ovpn extension), please download from your VPN provider and then restart this container, exiting..." | ts '%Y-%m-%d %H:%M:%.S' && exit 1
-	fi
-	
-	echo "[info] OpenVPN config file (ovpn extension) is located at ${VPN_CONFIG}" | ts '%Y-%m-%d %H:%M:%.S'
 	
 	# Read username and password env vars and put them in credentials.conf, then add ovpn config for credentials file
 	if [[ ! -z "${VPN_USERNAME}" ]] && [[ ! -z "${VPN_PASSWORD}" ]]; then
-		if [[ ! -e /config/openvpn/credentials.conf ]]; then
-			touch /config/openvpn/credentials.conf
-		fi
-
-		echo "${VPN_USERNAME}" > /config/openvpn/credentials.conf
-		echo "${VPN_PASSWORD}" >> /config/openvpn/credentials.conf
+		OPENVPN_CREDENTIALS="$ETC_OPENVPN/credentials.conf"
+		echo "${VPN_USERNAME}" > $OPENVPN_CREDENTIALS
+		echo "${VPN_PASSWORD}" >> $OPENVPN_CREDENTIALS
 
 		# Replace line with one that points to credentials.conf
-		auth_cred_exist=$(cat ${VPN_CONFIG} | grep -m 1 'auth-user-pass')
+		auth_cred_exist=$(grep -m 1 'auth-user-pass' $VPN_CONFIG || true)
 		if [[ ! -z "${auth_cred_exist}" ]]; then
 			# Get line number of auth-user-pass
 			LINE_NUM=$(grep -Fn -m 1 'auth-user-pass' ${VPN_CONFIG} | cut -d: -f 1)
-			sed -i "${LINE_NUM}s/.*/auth-user-pass credentials.conf\n/" ${VPN_CONFIG}
+			sed "${LINE_NUM}s/.*/auth-user-pass credentials.conf\n/" ${VPN_CONFIG} > $OPENVPN_CONFIG
 		else
-			sed -i "1s/.*/auth-user-pass credentials.conf\n/" ${VPN_CONFIG}
+			sed -e "\$aauth-user-pass credentials.conf\n" ${VPN_CONFIG} > $OPENVPN_CONFIG
 		fi
 	fi
 	
 	# convert CRLF (windows) to LF (unix) for ovpn
-	/usr/bin/dos2unix "${VPN_CONFIG}" 1> /dev/null
+	/usr/bin/dos2unix $OPENVPN_CONFIG 1> /dev/null
 	
 	# parse values from ovpn file
 	export vpn_remote_line=$(cat "${VPN_CONFIG}" | grep -P -o -m 1 '(?<=^remote\s)[^\n\r]+' | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
@@ -161,8 +161,8 @@ fi
 
 if [[ $VPN_ENABLED == "yes" ]]; then
 	echo "[info] Starting OpenVPN..." | ts '%Y-%m-%d %H:%M:%.S'
-	cd /config/openvpn
-	exec openvpn --config ${VPN_CONFIG} &
+	cd $ETC_OPENVPN
+	exec openvpn --config $OPENVPN_CONFIG &
 	# give openvpn some time to connect
 	sleep 5
 	#exec /bin/bash /etc/openvpn/openvpn.init start &
@@ -170,3 +170,4 @@ if [[ $VPN_ENABLED == "yes" ]]; then
 else
 	exec /bin/bash /etc/qbittorrent/start.sh
 fi
+
