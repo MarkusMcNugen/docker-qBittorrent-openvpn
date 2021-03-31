@@ -104,6 +104,14 @@ Using the latest stable verison of Docker is always recommended. Support for old
 # Building the container yourself
 To build this container, clone the repository and cd into it.
 
+## Note for Windows users:
+Your Git for Windows installation may be configured to convert Unix-style line-endings (i.e. `'\n'`) to Windows-style line-endings (i.e. `"\r\n"`) by default. If this is not overridden, images built from your local repository may encounter run-time failures due to line-ending differences between Unix and Windows.
+
+To avoid this behavior, it is recommended to clone the repository with `core.autocrlf` configured as `input`:
+```
+$ git clone -c core.autocrlf=input git://github.com/MarkusMcNugen/docker-qBittorrentvpn.git
+```
+
 ## Build it:
 ```
 $ cd /repo/location/qbittorrentvpn
