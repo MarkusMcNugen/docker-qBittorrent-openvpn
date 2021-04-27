@@ -21,7 +21,8 @@ To run the container use this command:
 
 ```
 $ docker run --privileged  -d \
-              -v /your/config/path/:/config \
+              -v /your/qBittorrent/path/:/config/qBittorrent \
+              -v /your/openvpn/client.conf:/config/client.ovpn \
               -v /your/downloads/path/:/downloads \
               -e "VPN_ENABLED=yes" \
               -e "LAN_NETWORK=192.168.1.0/24" \
@@ -37,6 +38,7 @@ $ docker run --privileged  -d \
 | Variable | Required | Function | Example |
 |----------|----------|----------|----------|
 |`VPN_ENABLED`| Yes | Enable VPN? (yes/no) Default:yes|`VPN_ENABLED=yes`|
+|`VPN_CONFIG`| No | Path to OpenVPN config file. Default: /config/client.ovpn| `VPN_CONFIG=/config/client.conf`
 |`VPN_USERNAME`| No | If username and password provided, configures ovpn file automatically |`VPN_USERNAME=ad8f64c02a2de`|
 |`VPN_PASSWORD`| No | If username and password provided, configures ovpn file automatically |`VPN_PASSWORD=ac98df79ed7fb`|
 |`LAN_NETWORK`| Yes | Local Network with CIDR notation |`LAN_NETWORK=192.168.1.0/24`|
@@ -50,7 +52,8 @@ $ docker run --privileged  -d \
 ## Volumes
 | Volume | Required | Function | Example |
 |----------|----------|----------|----------|
-| `config` | Yes | qBittorrent and OpenVPN config files | `/your/config/path/:/config`|
+| `qBittorrent` | Yes | qBittorrent and OpenVPN config files | `/your/config/path/:/config/qBittorrent`|
+| `client.ovpn` | No | OpenVPN config file if `VPN_ENABLED=yes` | `/your/openvpn/client.conf:/config/client.ovpn`|
 | `downloads` | No | Default download path for torrents | `/your/downloads/path/:/downloads`|
 
 ## Ports
@@ -112,7 +115,8 @@ $ docker build -t qbittorrentvpn .
 ## Run it:
 ```
 $ docker run --privileged  -d \
-              -v /your/config/path/:/config \
+              -v /your/qBittorrent/path/:/config/qBittorrent \
+              -v /your/openvpn/client.conf:/config/client.ovpn \
               -v /your/downloads/path/:/downloads \
               -e "VPN_ENABLED=yes" \
               -e "LAN_NETWORK=192.168.1.0/24" \
