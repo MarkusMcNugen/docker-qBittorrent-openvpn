@@ -46,6 +46,7 @@ $ docker run --privileged  -d \
 |`UMASK`| No | GID applied to config files and downloads |`UMASK=002`|
 |`WEBUI_PORT_ENV`| No | Applies WebUI port to qBittorrents config at boot (Must change exposed ports to match)  |`WEBUI_PORT_ENV=8080`|
 |`INCOMING_PORT_ENV`| No | Applies Incoming port to qBittorrents config at boot (Must change exposed ports to match) |`INCOMING_PORT_ENV=8999`|
+|`PIA_PORT_FORWARD`| No | Request and set a port forward when using PIA (Private Internet Access) Overrides `INCOMING_PORT` when enabled |`PIA_PORT_FORWARD=true`|
 
 ## Volumes
 | Volume | Required | Function | Example |
