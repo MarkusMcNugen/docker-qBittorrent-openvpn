@@ -18,7 +18,7 @@ RUN apt-get update \
     && apt-get install -y software-properties-common \
     && add-apt-repository ppa:qbittorrent-team/qbittorrent-stable \
     && apt-get update \
-    && apt-get install -y jq traceroute qbittorrent-nox openvpn curl moreutils net-tools dos2unix kmod iptables ipcalc unrar \
+    && apt-get install -y iputils-ping jq traceroute qbittorrent-nox openvpn curl moreutils net-tools dos2unix kmod iptables ipcalc unrar \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add configuration and scripts

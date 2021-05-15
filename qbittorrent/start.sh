@@ -84,12 +84,28 @@ if [ -e /proc/$qbpid ]; then
 		chmod 775 /config/qBittorrent/data/logs/qbittorrent.log
 		if [[ $PFWD == "yes" ]]; then
 			echo "[info] PIA Port forwarding configured, calling pia_port_forwarding.sh"
-			/bin/bash /etc/openvpn/pia_port_forwarding.sh
+			/bin/bash /etc/openvpn/pia_port_forwarding.sh &
 		else
 			echo "[info] PIA Port forwarding not enabled"
 		fi
 	fi
-	sleep infinity
+	while true; do
+		sleep 60 #check once per minute if VPN is up
+		ping -I tun0 -c 1 8.8.8.8 > /dev/null && VPNUP=true || VPNUP=false
+		if [[ $VPNUP == false ]]; then
+			echo "[crit] VPN down, shutting down docker (turn on auto restart to reconnect)" | ts '%Y-%m-%d %H:%M:%.S'
+			exit 5
+		fi
+		pidof qbittorrent-nox >& /dev/null
+		if [[ $? -ne 0 ]]; then 
+			sleep 10 #check again after 10 secs.. maybe we were just restarting service to get new port forward
+			pidof qbittorrent-nox >& /dev/null
+			if [[ $? -ne 0 ]]; then 
+				echo "[crit] qbittorrent stopped, shutting down docker (turn on auto restart to reconnect)" | ts '%Y-%m-%d %H:%M:%.S'
+				exit 6
+			fi
+		fi
+	done
 else
 	echo "qBittorrent failed to start!"
 fi
