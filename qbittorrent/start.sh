@@ -90,8 +90,8 @@ if [ -e /proc/$qbpid ]; then
 		fi
 	fi
 	while true; do
-		sleep 60 #check once per minute if VPN is up
-		ping -I tun0 -c 1 8.8.8.8 > /dev/null && VPNUP=true || VPNUP=false
+		sleep 120 #check once every couple minutes if VPN is up
+		ping -I tun0 -c 10 8.8.8.8 > /dev/null && VPNUP=true || VPNUP=false
 		if [[ $VPNUP == false ]]; then
 			echo "[crit] VPN down, shutting down docker (turn on auto restart to reconnect)" | ts '%Y-%m-%d %H:%M:%.S'
 			exit 5
