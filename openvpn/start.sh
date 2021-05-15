@@ -10,7 +10,7 @@ if [[ ! -z "${check_network}" ]]; then
 	echo "[crit] Network type detected as 'Host', this will cause major issues, please stop the container and switch back to 'Bridge' mode" | ts '%Y-%m-%d %H:%M:%.S' && exit 1
 fi
 
-export VPN_ENABLED=$(echo "${VPN_ENABLED}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+export VPN_ENABLED=$(echo "${VPN_ENABLED}" | sed 's/"//g' ) #| sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
 if [[ ! -z "${VPN_ENABLED}" ]]; then
 	echo "[info] VPN_ENABLED defined as '${VPN_ENABLED}'" | ts '%Y-%m-%d %H:%M:%.S'
 else
@@ -19,6 +19,7 @@ else
 fi
 
 if [[ $VPN_ENABLED == "yes" ]]; then
+    echo "[info] Initializing OpenVpn" | ts '%Y-%m-%d %H:%M:%.S'
 	# create directory to store openvpn config files
 	mkdir -p /config/openvpn
 	# set perms and owner for files in /config/openvpn directory
@@ -131,7 +132,8 @@ if [[ $VPN_ENABLED == "yes" ]]; then
 		echo "[info] VPN_OPTIONS not defined (via -e VPN_OPTIONS)" | ts '%Y-%m-%d %H:%M:%.S'
 		export VPN_OPTIONS=""
 	fi
-elif [[ $VPN_ENABLED == "no" ]]; then
+#elif [[ $VPN_ENABLED == "no" ]]; then
+else
 	echo "[warn] !!IMPORTANT!! You have set the VPN to disabled, you will NOT be secure!" | ts '%Y-%m-%d %H:%M:%.S'
 fi
 

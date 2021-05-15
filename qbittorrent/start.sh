@@ -77,9 +77,17 @@ sleep 1
 qbpid=$(pgrep -o -x qbittorrent-nox)
 echo "[info] qBittorrent PID: $qbpid" | ts '%Y-%m-%d %H:%M:%.S'
 
+export PFWD=$(echo "${PIA_PORT_FORWARD}" | sed 's/"//g' )
+
 if [ -e /proc/$qbpid ]; then
 	if [[ -e /config/qBittorrent/data/logs/qbittorrent.log ]]; then
 		chmod 775 /config/qBittorrent/data/logs/qbittorrent.log
+		if [[ $PFWD == "yes" ]]; then
+			echo "[info] PIA Port forwarding configured, calling pia_port_forwarding.sh"
+			/bin/bash /etc/openvpn/pia_port_forwarding.sh
+		else
+			echo "[info] PIA Port forwarding not enabled"
+		fi
 	fi
 	sleep infinity
 else
