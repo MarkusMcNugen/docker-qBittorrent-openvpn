@@ -9,8 +9,11 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/b
 curl_max_time=15
 curl_retry=5
 curl_retry_delay=15
-user='PIA_USER'
-pass='PIA_PASS'
+exec 6< /config/openvpn/credentials.conf
+
+read user <&6
+read pass <&6
+
 CONFFILE=/config/qBittorrent/config/qBittorrent.conf
 
 ###### Nextgen PIA port forwarding      ##################
