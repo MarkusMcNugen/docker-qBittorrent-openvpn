@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  dockerqbittorrentvpn:
+    image: dockerqbittorrentvpn
+    environment:
+      - VPN_ENABLED=yes
+      - PIA_PORT_FORWARD=yes
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - NAME_SERVERS=8.8.8.8,8.8.4.4
+      - LAN_NETWORK=192.168.12.0/24
+      - TZ=Canada/Mountain
+      - DEBIAN_FRONTEND=noninteractive
+    ports:
+      - "8080:8080"
+    devices:
+      - /dev/net/tun
+    restart: always
+    cap_add:
+      - NET_ADMIN 
+    volumes: 
+      - ~/vpncreds:/config
+    build:
+      context: .
+      dockerfile: ./Dockerfile
