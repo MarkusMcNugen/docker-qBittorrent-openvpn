@@ -13,7 +13,8 @@ services:
       - DEBIAN_FRONTEND=noninteractive
     ports:
       - "8080:8080"
-    privileged: true
+    devices:
+      - /dev/net/tun
     restart: always
     cap_add:
       - NET_ADMIN 
