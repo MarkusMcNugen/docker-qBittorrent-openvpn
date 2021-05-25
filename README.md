@@ -37,7 +37,7 @@ $ docker run --privileged  -d \
 | Variable | Required | Function | Example |
 |----------|----------|----------|----------|
 |`VPN_ENABLED`| Yes | Enable VPN? (yes/no) Default:yes|`VPN_ENABLED=yes`|
-|`PIA_PORT_FORWARD`| No | Enable Port Forwarding for Private Internet Access Service? (yes/no) Default:yes|`PIA_PORT_FORWARD=yes`|
+|`PIA_PORT_FORWARD`| No | Enable Port Forwarding for Private Internet Access Service? (yes/no) Default:no|`PIA_PORT_FORWARD=yes`|
 |`VPN_USERNAME`| No | If username and password provided, configures ovpn file automatically |`VPN_USERNAME=ad8f64c02a2de`|
 |`VPN_PASSWORD`| No | If username and password provided, configures ovpn file automatically |`VPN_PASSWORD=ac98df79ed7fb`|
 |`LAN_NETWORK`| Yes | Local Network with CIDR notation |`LAN_NETWORK=192.168.1.0/24`|
